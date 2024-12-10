@@ -1,0 +1,58 @@
+version: '4.0.5'
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    environment:
+      - WDS_SOCKET_PORT=0
+    depends_on:
+      - api
+      - worker
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PG_USER=postgres
+      - PG_HOST=postgres
+      - PG_DATABASE=postgres
+      - PG_PASSWORD=postgres_password
+      - PG_PORT=5432
+      - PORT=5000
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+
+  redis:
+    image: 'redis:latest'
+
+  nginx:
+    restart: always # we want this to keep running if one of our requests or upstreams fails
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - '3050:80'
+    depends_on:
+      - client
+      - api
+      - worker

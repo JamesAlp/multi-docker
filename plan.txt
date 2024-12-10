@@ -1,0 +1,28 @@
+Making an overly complex fibonance caluclator to gain experience with multi container application
+
+- Nginx web server
+ - will do application routing to react server and express server
+- react server
+ - frontend
+ - will make ajax request to express server
+- express server
+ - backend api
+ - receives request, saves index to postgres db
+- redis
+ - will use to cache values
+ - will be used to store "calculated values" data
+ - store all indices and calculated values as key-value pairs
+- worker (?)
+ - watches redis for new indices
+ - pulls each new index
+ - calculates new value then puts it back into redis
+- postgres db
+ - will be used to store "values i have seen" data
+
+ Flow:
+ - push to github
+ - github actions builds a test image, tests code
+ - github actions builds prod images
+ - github actions push images to docker hub
+ - github actions pushes project to AWS EB
+ - EB pulls images drom docker hub, deploys
